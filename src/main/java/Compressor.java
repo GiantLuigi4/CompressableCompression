@@ -22,31 +22,45 @@ public class Compressor {
 			BigInteger amt = new BigInteger(str);
 			int i = 0;
 			while (true) {
-				map.put(i, amt);
+//				map.put(i, amt);
+				if (amt.compareTo(new BigInteger("255")) < 0){
+					map.put(i, amt);
+					break;
+				} else {
+					map.put(i, magicNumber);
+				}
 				amt = amt.divide(magicNumber);
-				if (amt.compareTo(new BigInteger("255")) < 0) break;
 				i++;
 			}
 		}
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		BigInteger checker = new BigInteger("1");
-//		BigInteger src = new BigInteger(str);
-		for (Integer integer : map.keySet()) {
-			BigInteger amt = map.get(integer);
-//			checker = checker.add(new BigInteger("255").multiply(new BigInteger(integer + "")));
-			BigInteger amt1 = new BigInteger(amt.toString()).divide(magicNumber).multiply(magicNumber);
-			int i = amt.subtract(amt1).intValue();
-//			System.out.println(i);
-//			checker = checker.add(new BigInteger("" + i).multiply(magicNumber).multiply(new BigInteger((integer + 1) + "")));
-			checker = checker.multiply(magicNumber).add(map.get(integer));
-//			checker = checker.add(new BigInteger("" + i));
-			out.write((byte) (i - 128));
-//			if (i != 0) out.write((byte) (i - 128));
-//			else out.write((byte) -255);
+		BigInteger checker = (map.get(map.size() - 1));
+		for (int i = 0; i < map.keySet().size() - 1; i++) {
+			BigInteger bi = map.get(i);
+			checker = checker.multiply(bi);
 		}
 		System.out.println(checker.toString());
 		System.out.println(str);
-		System.out.println(Arrays.toString(out.toByteArray()));
+//		BigInteger src = new BigInteger(str);
+/*		BigInteger lastAmt = new BigInteger("0");
+		for (Integer integer : map.keySet()) {
+			BigInteger num = map.get(integer);
+			{
+				BigInteger amt1 = new BigInteger(num.toString()).divide(magicNumber).multiply(magicNumber);
+				int i = num.subtract(amt1).intValue();
+				num = new BigInteger("" + (i + 1));
+			}
+//			System.out.println(num);
+			checker = checker.multiply(magicNumber);
+			checker = checker.multiply(num);
+			checker = checker.add(num);
+			lastAmt = num;
+			out.write(num.intValue());
+		}*/
+//		checker = checker.multiply(lastAmt);
+//		System.out.println(checker.toString());
+//		System.out.println(str);
+//		System.out.println(Arrays.toString(out.toByteArray()));
 //		BigInteger src = new BigInteger(str);
 //		BigInteger amt = new BigInteger(src.toString()).divide(magicNumber);
 //		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -301,7 +315,7 @@ public class Compressor {
 		}
 //		System.out.println(num.toString());
 //		return "".getBytes();
-		System.out.println(num.toString());
+//		System.out.println(num.toString());
 		return _toByteStr(num.toString()).getBytes();
 	}
 }
