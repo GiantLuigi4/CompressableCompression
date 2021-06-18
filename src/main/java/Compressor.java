@@ -13,7 +13,8 @@ public class Compressor {
 	// or I could just write it to a file and use file input stream, I think
 	private static final byte[] header = new byte[]{-128, 127, -123};
 	
-	private static final BigInteger magicNumber = new BigInteger("" + (2048*2048*256+10));
+//	private static final BigInteger magicNumber = new BigInteger("" + (2048*2048*256+10));
+	private static final BigInteger magicNumber = new BigInteger("" + (255));
 	
 	protected byte[] _$internCompress(String str) {
 		HashMap<Integer, BigInteger> map = new HashMap<>();
@@ -28,18 +29,24 @@ public class Compressor {
 			}
 		}
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		BigInteger checker = new BigInteger("0");
+		BigInteger checker = new BigInteger("1");
 //		BigInteger src = new BigInteger(str);
 		for (Integer integer : map.keySet()) {
 			BigInteger amt = map.get(integer);
-			checker = checker.add(new BigInteger("255").multiply(new BigInteger(integer + "")));
+//			checker = checker.add(new BigInteger("255").multiply(new BigInteger(integer + "")));
 			BigInteger amt1 = new BigInteger(amt.toString()).divide(magicNumber).multiply(magicNumber);
 			int i = amt.subtract(amt1).intValue();
-			checker = checker.add(new BigInteger("" + i));
-			if (i != 0) out.write((char) (i));
+//			System.out.println(i);
+//			checker = checker.add(new BigInteger("" + i).multiply(magicNumber).multiply(new BigInteger((integer + 1) + "")));
+			checker = checker.multiply(magicNumber).add(map.get(integer));
+//			checker = checker.add(new BigInteger("" + i));
+			out.write((byte) (i - 128));
+//			if (i != 0) out.write((byte) (i - 128));
+//			else out.write((byte) -255);
 		}
 		System.out.println(checker.toString());
 		System.out.println(str);
+		System.out.println(Arrays.toString(out.toByteArray()));
 //		BigInteger src = new BigInteger(str);
 //		BigInteger amt = new BigInteger(src.toString()).divide(magicNumber);
 //		ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -139,7 +146,6 @@ public class Compressor {
 	public String compress(String src) {
 //		src = __internCompress(src);
 		src = _toByteStr(src);
-		System.out.println(src);
 		String strC1 = new String(_internCompress(src));
 		String strC2 = __internCompress(strC1);
 //		return new String(header) + strC1;
@@ -147,15 +153,10 @@ public class Compressor {
 //		return strC2;
 	}
 	
-	public String compress(byte[] bytes) {
-//		src = __internCompress(src);
+	public byte[] compress(byte[] bytes) {
 		String src = _toByteStr(bytes);
-		System.out.println(src);
 		String strC1 = new String(_internCompress(src));
-		String strC2 = __internCompress(strC1);
-//		return new String(header) + strC1;
-		return strC1;
-//		return strC2;
+		return strC1.getBytes();
 	}
 	
 	// TODO: actual compression method which works on the entire string instead of just on a section of the string which is the series of bytes of the original string
@@ -263,16 +264,7 @@ public class Compressor {
 	private String _decompress(String strC2) {
 //		if (!strC2.startsWith(new String(header))) return strC2; // TODO: throw an exception
 		String strc1 = strC2.substring(0);
-		BigInteger num = new BigInteger("0");
-		int i = 0;
-		for (byte b : strc1.getBytes()) {
-			System.out.println(b);
-			num = num.add(new BigInteger("255").multiply(new BigInteger(i + "")));
-			i++;
-//			num = num.add(new BigInteger(""+(int)(b + 128)).multiply(magicNumber));
-		}
-		System.out.println(num.toString());
-		return "";
+		return new String(decompress(strc1.getBytes()));
 	}
 	
 	protected String _srcString(String str) {
@@ -292,6 +284,25 @@ public class Compressor {
 		System.out.println();
 		System.out.println(compressed.getBytes().length + ": " + compressed);
 		return compressed;
+	}
+	
+	public byte[] decompress(byte[] compressedBytes) {
+		BigInteger num = new BigInteger("1");
+		int i = 0;
+		System.out.println(Arrays.toString(compressedBytes));
+		for (byte b : compressedBytes) {
+//			System.out.println(b);
+//			num = num.add(new BigInteger("255").multiply(magicNumber).multiply(new BigInteger((i + 128) + "")));
+			num = num.multiply(new BigInteger("" + (255)).multiply(magicNumber));
+//			num = num.multiply(new BigInteger("" + (255)).multiply(magicNumber).multiply(new BigInteger((i + 1) + "")));
+//			num = num.add(new BigInteger("" + (b + 128)));
+			i++;
+//			num = num.add(new BigInteger(""+(int)(b + 128)).multiply(magicNumber));
+		}
+//		System.out.println(num.toString());
+//		return "".getBytes();
+		System.out.println(num.toString());
+		return _toByteStr(num.toString()).getBytes();
 	}
 }
 
